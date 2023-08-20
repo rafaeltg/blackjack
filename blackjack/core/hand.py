@@ -19,22 +19,45 @@ card_values = {
 class Hand:
     def __init__(self):
         self.cards: list[Card] = []
-        self.value: int = 0
-        self.aces: int = 0
+        self._aces: int = 0
     
-    def add_card(self, card: Card) -> None:
-        self.cards.append(card)
-        self.value += card_values[card.rank]
-        self.aces += int(card.rank == 'A')
+    @property
+    def value(self) -> Card:
+        value = 0
+        
+        for c in self.cards:
+            value += card_values[c.rank]
+        
+        if self._aces:
+            aces = self._aces
+            # if we bust and we have aces, set each ace to 1 until get back under 21
+            while value > 21 and aces:
+                value -= 10
+                aces -= 1
+                
+        return value
 
-    def adjust_for_ace(self):
-        while self.value > 21 and self.aces:
-            self.value -= 10
-            self.aces -= 1
-    
-    def blackjack(self) -> bool:
-        return self.value == 21
-    
+    def push(self, card: Card) -> None:
+        """
+        Add new card.
+
+        Args:
+            card (Card): new card
+        """
+        self.cards.append(card)
+        self._aces += int(card.rank == 'A')
+        
+    def pop(self) -> Card:
+        """
+        Remove the last card of the hand.
+
+        Returns:
+            Card: removed card
+        """
+        card = self.cards.pop()
+        self._aces -= int(card.rank == 'A')
+        return card
+
     def can_split(self) -> bool:
         """
         You can split if you have two cards of the same value (eg, a pair of sevens, 10s, or a king and a jack and so on).
@@ -47,13 +70,14 @@ class Hand:
             
     def can_double_down(self) -> bool:
         """
-        You can double down if you have two cards of any value.
+        You can double down when your first two cards total 9, 10, or 11.
 
         Returns:
-            bool: if the hand qualifies for a split or not
+            bool: if the hand qualifies for a double down or not
         """
+        value = self.value
         return len(self.cards) == 2 and \
-            card_values[self.cards[0].rank] == card_values[self.cards[1].rank]
+            (value == 9 or value == 10 or value == 11)
     
     def __str__(self) -> str:
         return f"Hand(cards = [{', '.join(str(c) for c in self.cards)}], value = {self.value})"

@@ -1,0 +1,11 @@
+FROM python:3.11-bullseye
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+WORKDIR /app
+
+COPY . .
+
+CMD ["python", "blackjack/main.py"]
