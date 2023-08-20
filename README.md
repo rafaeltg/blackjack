@@ -2,7 +2,7 @@
 
 Blackjack game implemented using Python
 
-## Instructions to play
+## Instructions
 
 ### Requirements
 - docker
